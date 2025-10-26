@@ -38,6 +38,8 @@ function App() {
   const [insertAfterIndex, setInsertAfterIndex] = useState(null)
   const [selectedSignIndex, setSelectedSignIndex] = useState(null)
   const [contextMenu, setContextMenu] = useState(null)
+  const [draggedIndex, setDraggedIndex] = useState(null)
+  const [dragOverIndex, setDragOverIndex] = useState(null)
   const fileInputRef = useRef(null)
 
   const vpRef = useRef(null)
@@ -169,16 +171,79 @@ function App() {
       }
     }
 
+    const handleDragStart = (e) => {
+      const path = e.composedPath()
+      const index = getIndexFromSign(path)
+      if (index !== -1) {
+        setDraggedIndex(index)
+        e.dataTransfer.effectAllowed = 'move'
+      }
+    }
+
+    const handleDragOver = (e) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+
+      const path = e.composedPath()
+      const index = getIndexFromSign(path)
+      if (index !== -1 && index !== draggedIndex) {
+        setDragOverIndex(index)
+      }
+    }
+
+    const handleDragEnd = () => {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+    }
+
+    const handleDrop = (e) => {
+      e.preventDefault()
+
+      if (draggedIndex === null) return
+
+      const path = e.composedPath()
+      const dropIndex = getIndexFromSign(path)
+
+      if (dropIndex !== -1 && dropIndex !== draggedIndex) {
+        const newSigns = [...signs]
+        const [draggedSign] = newSigns.splice(draggedIndex, 1)
+        newSigns.splice(dropIndex, 0, draggedSign)
+        updateSignsWithHistory(newSigns)
+
+        // Update selected index if needed
+        if (selectedSignIndex === draggedIndex) {
+          setSelectedSignIndex(dropIndex)
+        } else if (selectedSignIndex !== null) {
+          if (draggedIndex < selectedSignIndex && dropIndex >= selectedSignIndex) {
+            setSelectedSignIndex(selectedSignIndex - 1)
+          } else if (draggedIndex > selectedSignIndex && dropIndex <= selectedSignIndex) {
+            setSelectedSignIndex(selectedSignIndex + 1)
+          }
+        }
+      }
+
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+    }
+
     vpElement.addEventListener('click', handleClick)
     vpElement.addEventListener('dblclick', handleDoubleClick)
     vpElement.addEventListener('contextmenu', handleContextMenu)
+    vpElement.addEventListener('dragstart', handleDragStart)
+    vpElement.addEventListener('dragover', handleDragOver)
+    vpElement.addEventListener('dragend', handleDragEnd)
+    vpElement.addEventListener('drop', handleDrop)
 
     return () => {
       vpElement.removeEventListener('click', handleClick)
       vpElement.removeEventListener('dblclick', handleDoubleClick)
       vpElement.removeEventListener('contextmenu', handleContextMenu)
+      vpElement.removeEventListener('dragstart', handleDragStart)
+      vpElement.removeEventListener('dragover', handleDragOver)
+      vpElement.removeEventListener('dragend', handleDragEnd)
+      vpElement.removeEventListener('drop', handleDrop)
     }
-  }, [signs])
+  }, [signs, draggedIndex])
 
   // Close context menu and clear selection when clicking anywhere outside
   useEffect(() => {
@@ -196,7 +261,7 @@ function App() {
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
-  // Update selected styles on signs in shadow DOM
+  // Update selected styles and draggable attribute on signs in shadow DOM
   useEffect(() => {
     const vpElement = vpRef.current
     if (!vpElement) return
@@ -208,6 +273,10 @@ function App() {
       const allSigns = Array.from(vpElement.shadowRoot.querySelectorAll('sgnw-sign, sgnw-symbol'))
 
       allSigns.forEach((sign, index) => {
+        // Make draggable
+        sign.setAttribute('draggable', 'true')
+
+        // Apply selection styles
         if (index === selectedSignIndex) {
           sign.style.outline = '3px solid #ef4444'
           sign.style.outlineOffset = '2px'
@@ -219,11 +288,21 @@ function App() {
           sign.style.backgroundColor = ''
           sign.style.borderRadius = ''
         }
+
+        // Apply drag styles
+        if (index === draggedIndex) {
+          sign.style.opacity = '0.5'
+        } else if (index === dragOverIndex) {
+          sign.style.borderLeft = '3px solid #3b82f6'
+        } else {
+          sign.style.opacity = ''
+          sign.style.borderLeft = ''
+        }
       })
     }, 10)
 
     return () => clearTimeout(timeout)
-  }, [selectedSignIndex, signs])
+  }, [selectedSignIndex, signs, draggedIndex, dragOverIndex])
 
   // Keyboard shortcuts for undo/redo and selection
   useEffect(() => {
