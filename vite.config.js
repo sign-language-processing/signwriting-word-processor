@@ -9,7 +9,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'SignWriting Word Processor',
         short_name: 'SignWriter',
@@ -17,23 +16,11 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ],
+        scope: '/signwriting-word-processor/',
+        start_url: '/signwriting-word-processor/',
         file_handlers: [
           {
-            action: '/',
+            action: '/signwriting-word-processor/',
             accept: {
               'application/x-signwriting': ['.sgnw']
             }
@@ -41,8 +28,22 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        navigateFallback: null
       }
     })
   ],
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/]
+    },
+    rollupOptions: {
+      output: {
+        inlineDynamicImports: true
+      }
+    }
+  },
+  optimizeDeps: {
+    include: ['@sutton-signwriting/sgnw-components']
+  }
 })
