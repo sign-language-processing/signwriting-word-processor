@@ -1,0 +1,8 @@
+You need to add two icon files to this directory:
+- pwa-192x192.png (192x192 pixels)
+- pwa-512x512.png (512x512 pixels)
+
+These should be SignWriting-themed icons for the PWA.
+
+You can create these using any image editor or icon generator.
+For now, the app will work without icons, but they're needed for proper PWA installation.

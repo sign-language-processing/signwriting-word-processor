@@ -1,0 +1,183 @@
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.toolbar {
+  background-color: #f3f4f6;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background-color: #d1d5db;
+  margin: 0 0.25rem;
+}
+
+.icon-button {
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.icon-button:active:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.document {
+  flex: 1;
+  overflow: auto;
+  background-color: #ffffff;
+  padding: 2rem;
+}
+
+.viewport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-start;
+  min-height: 100%;
+  color: #000000;
+}
+
+sgnw-sign {
+  color: #000000;
+}
+
+sgnw-sign.selected,
+sgnw-symbol.selected {
+  outline: 3px solid #ef4444;
+  outline-offset: 2px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+}
+
+.sign-wrapper {
+  position: relative;
+  padding: 1rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sign-wrapper:hover {
+  border-color: #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.sign-wrapper.selected {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+  box-shadow: 0 0 0 2px #ef4444;
+}
+
+.sign-actions {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  gap: 0.25rem;
+  flex-direction: column;
+}
+
+.sign-wrapper:hover .sign-actions,
+.sign-wrapper.selected .sign-actions {
+  display: flex;
+}
+
+.sign-actions button {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 3px;
+  background-color: white;
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.sign-actions button:hover {
+  background-color: #f3f4f6;
+}
+
+.context-menu {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.context-menu button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #1f2937;
+  transition: background-color 0.2s;
+}
+
+.context-menu button:hover {
+  background-color: #f3f4f6;
+}
+
+.context-menu button:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
