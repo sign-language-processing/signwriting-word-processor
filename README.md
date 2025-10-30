@@ -62,11 +62,6 @@ The app saves documents as .sgnw files containing space-separated SWU (SignWriti
 ## TODO
 
 - Add PWA icons (see public/icon-note.txt)
-- Enhance SignMaker iframe communication for better sync
-- Add keyboard shortcuts
-- Add undo/redo functionality
-- Support for multiple pages
-- Print functionality
 
 ## Technologies
 

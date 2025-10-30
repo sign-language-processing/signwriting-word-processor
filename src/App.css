@@ -181,3 +181,17 @@ sgnw-symbol.selected {
 .context-menu button:not(:last-child) {
   border-bottom: 1px solid #e5e7eb;
 }
+
+@media print {
+  .toolbar {
+    display: none !important;
+  }
+
+  .document {
+    padding: 0;
+  }
+
+  .app {
+    height: auto;
+  }
+}

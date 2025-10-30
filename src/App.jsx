@@ -40,6 +40,7 @@ function App() {
   const [contextMenu, setContextMenu] = useState(null)
   const [draggedIndex, setDraggedIndex] = useState(null)
   const [dragOverIndex, setDragOverIndex] = useState(null)
+  const [themeEnabled, setThemeEnabled] = useState(false)
   const fileInputRef = useRef(null)
 
   const vpRef = useRef(null)
@@ -299,10 +300,41 @@ function App() {
           sign.style.borderLeft = ''
         }
       })
+
+      // Apply theme styles to sgnw-vp
+      if (themeEnabled) {
+        vpElement.style.border = 'none'
+
+        // Apply styles to span elements inside shadow DOM
+        const outsideSpans = vpElement.shadowRoot.querySelectorAll('span.outside')
+        const insideSpans = vpElement.shadowRoot.querySelectorAll('span.inside')
+
+        outsideSpans.forEach(span => {
+          span.style.border = 'none'
+        })
+
+        insideSpans.forEach(span => {
+          span.style.border = 'none'
+        })
+      } else {
+        vpElement.style.border = ''
+
+        // Reset styles
+        const outsideSpans = vpElement.shadowRoot.querySelectorAll('span.outside')
+        const insideSpans = vpElement.shadowRoot.querySelectorAll('span.inside')
+
+        outsideSpans.forEach(span => {
+          span.style.border = ''
+        })
+
+        insideSpans.forEach(span => {
+          span.style.border = ''
+        })
+      }
     }, 10)
 
     return () => clearTimeout(timeout)
-  }, [selectedSignIndex, signs, draggedIndex, dragOverIndex])
+  }, [selectedSignIndex, signs, draggedIndex, dragOverIndex, themeEnabled])
 
   // Keyboard shortcuts for undo/redo and selection
   useEffect(() => {
@@ -443,6 +475,10 @@ function App() {
     }
   }
 
+  const handlePrint = () => {
+    window.print()
+  }
+
   return (
     <div className="app">
       <header className="toolbar">
@@ -464,6 +500,19 @@ function App() {
           </button>
           <button onClick={() => fileInputRef.current?.click()} title="Open" className="icon-button">
             📂
+          </button>
+          <div className="toolbar-separator"></div>
+          <button
+            onClick={() => setThemeEnabled(!themeEnabled)}
+            title={themeEnabled ? "Disable Clean Theme" : "Enable Clean Theme"}
+            className="icon-button"
+            style={themeEnabled ? { backgroundColor: '#e5e7eb' } : {}}
+          >
+            {themeEnabled ? '🎨' : '🖼️'}
+          </button>
+          <div className="toolbar-separator"></div>
+          <button onClick={handlePrint} title="Print (Ctrl+P)" className="icon-button">
+            🖨️
           </button>
           <input
             ref={fileInputRef}
