@@ -2,6 +2,24 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import SignMakerModal from './components/SignMakerModal'
 
+const LANE_MARKERS = {
+  left: '𝠂',   // U+1D802
+  middle: '𝠃', // U+1D803
+  right: '𝠄'  // U+1D804
+}
+
+const getSignLane = (swu) => {
+  if (swu.includes(LANE_MARKERS.left)) return 'left'
+  if (swu.includes(LANE_MARKERS.right)) return 'right'
+  return 'middle'
+}
+
+const changeSignLane = (swu, newLane) => {
+  const currentLane = getSignLane(swu)
+  if (currentLane === newLane) return swu
+  return swu.replace(LANE_MARKERS[currentLane], LANE_MARKERS[newLane])
+}
+
 const INITIAL_SIGNS = '𝠀񀀒񀀚񋚥񋛩𝠃𝤟𝤩񋛩𝣵𝤐񀀒𝤇𝣤񋚥𝤐𝤆񀀚𝣮𝣭 𝠀񂇢񂇈񆙡񋎥񋎵𝠃𝤛𝤬񂇈𝤀𝣺񂇢𝤄𝣻񋎥𝤄𝤗񋎵𝤃𝣟񆙡𝣱𝣸 𝠀񅨑񀀙񆉁𝠃𝤙𝤞񀀙𝣷𝤀񅨑𝣼𝤀񆉁𝣳𝣮 񏌁𝣢𝤂 𝠀񀕁𝠃𝤍𝤕񀕁𝣾𝣷 𝠀񂌢񂇷񆙡񈗦𝠃𝤩𝤛񂌢𝣢𝣱񂇷𝣬𝤉񆙡𝤍𝣽񈗦𝤜𝤎 񏊡𝣡𝤂 𝠀񀀡𝠃𝤎𝤕񀀡𝣿𝣷 𝠀񀀒񉁩񌏁𝠃𝤮𝤙񌏁𝣴𝣴񀀒𝤙𝣻񉁩𝤙𝣟 𝠀񀕁񀕉񆇡񈩡񈩽񆇡񋺁񌀇񌀃𝠃𝤲𝤡񀕉𝣨𝤃񀕁𝤖𝤃񌀇𝣴𝣴񆇡𝤙𝣶񆇡𝣩𝣶񈩡𝤊𝣢񈩽𝣕𝣡񌀃𝣴𝣴񋺁𝣽𝣗 񏊡𝣡𝤂 𝠀񀕡𝠃𝤎𝤕񀕡𝣿𝣷 𝠀񀀒񉁩񌏁𝠃𝤮𝤙񌏁𝣴𝣴񀀒𝤙𝣻񉁩𝤙𝣟 𝠀񀂁񂇻񈟃񆕁𝠃𝤣𝤘񂇻𝤈𝤌񆕁𝣹𝤁񀂁𝤍𝣵񈟃𝣩𝣽 𝠀񀀡񋎥񀀁𝠃𝤡𝤖񀀁𝤒𝣸񀀡𝣫𝣸񋎥𝣻𝣷 𝠀񀀓񃛆񆿅񆕁𝠃𝤣𝤟񀀓𝤅𝣯񆕁𝤅𝣽񃛆𝣪𝣮񆿅𝤅𝤐 񏌁𝣢𝤂 𝠀񂇢񉳍񂇂񂇈𝠃𝤬𝤘񂇢𝤕𝣵񂇈𝣡𝣴񂇂𝣤𝣵񉳍𝣿𝣼 𝠀񀀒񀀚񋠥񋡩𝠃𝤝𝤪񋡩𝣷𝤊񀀒𝤈𝣡񋠥𝤍𝤃񀀚𝣯𝣪 𝠀񃧁񃧉񆿅񆿕񋸥𝠃𝤨𝤛񆿕𝣭𝤉񃧁𝤌𝣱񃧉𝣥𝣱񆿅𝤔𝤊񋸥𝣿𝤕 񏌁𝣢𝤂 𝠀񅡁񂇸񈗨񈗨񂇑񂇙񇀥񇀵𝠃𝤤𝤸񂇸𝣨𝣚񂇑𝤕𝤝񂇙𝣳𝤝񅡁𝣼𝣦񇀵𝣱𝣺񈗨𝤊𝣔񇀥𝤔𝣻񈗨𝤖𝣞 𝠀񄹸񈗦񄾘𝠃𝤭𝤥񄹸𝣞𝣦񄾘𝤔𝤌񈗦𝣽𝣾 𝠃𝤗𝤜񀀋𝣹𝤍񀁂𝣵𝣱 񏊡𝣡𝤂 𝠀񆅁񇅅𝠃𝤏𝤙񆅁𝣿𝣳񇅅𝣾𝤇 񏌁𝣢𝤂 𝠃𝤦𝤖񄵡𝣧𝣷񆅁𝤁𝤆񃉡𝤔𝣸 񏊡𝣡𝤂 𝠃𝤧𝤬񅩱𝤊𝤝񍳡𝣴𝣴 𝠃𝤼𝤘񃛋𝣳𝣶񃛃𝤇𝣶񈙇𝤞𝣵񈙓𝣐𝣵񆇡𝤂𝤍 񏊡𝣡𝤂 𝠀񂋣񂋫񆕁񇆡𝠃𝤜𝤞񇆡𝣹𝣯񂋣𝤁𝤆񂋫𝣱𝤋񆕁𝣿𝣿 𝠀񀟡񆄩񆕁񈟃񍩁𝠃𝤟𝥄񆄩𝤉𝤵񀟡𝤐𝤕񆕁𝤁𝤥񈟃𝣰𝤟񍩁𝣴𝣴 񏊡𝣡𝤂 𝠃𝤹𝤰񅊰𝣒𝣣񅊂𝣴𝣝񈙆𝤈𝣺񈙖𝣥𝣼񅑢𝤠𝤏񅒐𝣺𝤐 𝠀񃁁񃁉񋠩񋡭񋸡𝠃𝤦𝤬񃁁𝤇𝤝񃁉𝣥𝤑񋡭𝣯𝣨񋠩𝤌𝣵񋸡𝤀𝣠 񏌁𝣢𝤂 𝠃𝤦𝤖񄵡𝣧𝣷񆅁𝤁𝤆񃉡𝤔𝣸 𝠀񃧁񃧉񆿅񆿕񋸥𝠃𝤨𝤛񆿕𝣭𝤉񃧁𝤌𝣱񃧉𝣥𝣱񆿅𝤔𝤊񋸥𝣿𝤕 񏊡𝣡𝤂 𝠀񀀒񀀚񋠥񋡩𝠃𝤝𝤪񋡩𝣷𝤊񀀒𝤈𝣡񋠥𝤍𝤃񀀚𝣯𝣪 𝠀񅡁񂇇񉨬𝠃𝤖𝤥񂇇𝣶𝣦񅡁𝣾𝣵񉨬𝣶𝤂 𝠀񆅱񆅹񇆥񇆵񌁵𝠃𝤢𝥇񆅱𝤎𝤤񆅹𝣯𝤤񇆥𝤉𝤹񇆵𝣩𝤹񌁵𝣴𝣯 񏌁𝣢𝤂'
 
 function App() {
@@ -350,8 +368,8 @@ function App() {
         return
       }
 
-      // Arrow key navigation
-      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      // Arrow Up/Down: navigate between signs
+      if (e.key === 'ArrowUp') {
         e.preventDefault()
         if (selectedSignIndex === null) {
           setSelectedSignIndex(signs.length - 1)
@@ -361,12 +379,43 @@ function App() {
         return
       }
 
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (e.key === 'ArrowDown') {
         e.preventDefault()
         if (selectedSignIndex === null) {
           setSelectedSignIndex(0)
         } else if (selectedSignIndex < signs.length - 1) {
           setSelectedSignIndex(selectedSignIndex + 1)
+        }
+        return
+      }
+
+      // Arrow Left/Right: change lane
+      if (e.key === 'ArrowLeft' && selectedSignIndex !== null) {
+        e.preventDefault()
+        const sign = signs[selectedSignIndex]
+        const currentLane = getSignLane(sign)
+        const newLane = currentLane === 'right' ? 'middle' : currentLane === 'middle' ? 'left' : null
+        if (newLane) {
+          const newSign = changeSignLane(sign, newLane)
+          console.log('Lane change (left):', { from: currentLane, to: newLane, newSign })
+          const newSigns = [...signs]
+          newSigns[selectedSignIndex] = newSign
+          updateSignsWithHistory(newSigns)
+        }
+        return
+      }
+
+      if (e.key === 'ArrowRight' && selectedSignIndex !== null) {
+        e.preventDefault()
+        const sign = signs[selectedSignIndex]
+        const currentLane = getSignLane(sign)
+        const newLane = currentLane === 'left' ? 'middle' : currentLane === 'middle' ? 'right' : null
+        if (newLane) {
+          const newSign = changeSignLane(sign, newLane)
+          console.log('Lane change (right):', { from: currentLane, to: newLane, newSign })
+          const newSigns = [...signs]
+          newSigns[selectedSignIndex] = newSign
+          updateSignsWithHistory(newSigns)
         }
         return
       }
@@ -489,10 +538,10 @@ function App() {
           </button>
           <div className="toolbar-separator"></div>
           <button onClick={undo} disabled={historyIndex === 0} title="Undo (Ctrl+Z)" className="icon-button">
-            ◀
+            ↩
           </button>
           <button onClick={redo} disabled={historyIndex === history.length - 1} title="Redo (Ctrl+Shift+Z)" className="icon-button">
-            ▶
+            ↪
           </button>
           <div className="toolbar-separator"></div>
           <button onClick={saveFile} disabled={signs.length === 0} title="Save" className="icon-button">
@@ -559,26 +608,56 @@ function App() {
         initialSign={editingIndex !== null ? signs[editingIndex] : null}
       />
 
-      {contextMenu && (
-        <div
-          className="context-menu"
-          style={{
-            position: 'fixed',
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 1000
-          }}
-        >
-          <button onClick={() => {
-            editSign(contextMenu.index)
-            setContextMenu(null)
-          }}>Edit</button>
-          <button onClick={() => {
-            deleteSign(contextMenu.index)
-            setContextMenu(null)
-          }}>Delete</button>
-        </div>
-      )}
+      {contextMenu && (() => {
+        const currentLane = getSignLane(signs[contextMenu.index])
+        return (
+          <div
+            className="context-menu"
+            style={{
+              position: 'fixed',
+              top: contextMenu.y,
+              left: contextMenu.x,
+              zIndex: 1000
+            }}
+          >
+            <button onClick={() => {
+              editSign(contextMenu.index)
+              setContextMenu(null)
+            }}>Edit</button>
+            <button onClick={() => {
+              deleteSign(contextMenu.index)
+              setContextMenu(null)
+            }}>Delete</button>
+            {currentLane !== 'left' && (
+              <button onClick={() => {
+                const newSign = changeSignLane(signs[contextMenu.index], 'left')
+                const newSigns = [...signs]
+                newSigns[contextMenu.index] = newSign
+                updateSignsWithHistory(newSigns)
+                setContextMenu(null)
+              }}>Lane: Left</button>
+            )}
+            {currentLane !== 'middle' && (
+              <button onClick={() => {
+                const newSign = changeSignLane(signs[contextMenu.index], 'middle')
+                const newSigns = [...signs]
+                newSigns[contextMenu.index] = newSign
+                updateSignsWithHistory(newSigns)
+                setContextMenu(null)
+              }}>Lane: Middle</button>
+            )}
+            {currentLane !== 'right' && (
+              <button onClick={() => {
+                const newSign = changeSignLane(signs[contextMenu.index], 'right')
+                const newSigns = [...signs]
+                newSigns[contextMenu.index] = newSign
+                updateSignsWithHistory(newSigns)
+                setContextMenu(null)
+              }}>Lane: Right</button>
+            )}
+          </div>
+        )
+      })()}
     </div>
   )
 }
